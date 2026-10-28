@@ -1,0 +1,42 @@
+name: Build Ailments mod
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Gradle 8.14
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.14'
+
+      - name: Create project files
+        run: |
+          mkdir -p src/main/java/com/ailments src/main/resources/META-INF
+          echo 'cGx1Z2lucyB7CiAgICBpZCAnamF2YS1saWJyYXJ5JwogICAgaWQgJ25ldC5uZW9mb3JnZWQubW9kZGV2JyB2ZXJzaW9uICcyLjAuMTQzJwp9Cgp2ZXJzaW9uID0gcHJvamVjdC5tb2RfdmVyc2lvbgpncm91cCA9IHByb2plY3QubW9kX2dyb3VwX2lkCgpiYXNlIHsKICAgIGFyY2hpdmVzTmFtZSA9IHByb2plY3QubW9kX2lkCn0KCmphdmEudG9vbGNoYWluLmxhbmd1YWdlVmVyc2lvbiA9IEphdmFMYW5ndWFnZVZlcnNpb24ub2YoMjEpCgpuZW9Gb3JnZSB7CiAgICB2ZXJzaW9uID0gcHJvamVjdC5uZW9fdmVyc2lvbgoKICAgIHJ1bnMgewogICAgICAgIGNsaWVudCB7CiAgICAgICAgICAgIGNsaWVudCgpCiAgICAgICAgfQogICAgfQoKICAgIG1vZHMgewogICAgICAgICIke3Byb2plY3QubW9kX2lkfSIgewogICAgICAgICAgICBzb3VyY2VTZXQgc291cmNlU2V0cy5tYWluCiAgICAgICAgfQogICAgfQp9Cg==' | base64 -d > build.gradle
+          echo 'cGx1Z2luTWFuYWdlbWVudCB7CiAgICByZXBvc2l0b3JpZXMgewogICAgICAgIGdyYWRsZVBsdWdpblBvcnRhbCgpCiAgICAgICAgbWF2ZW4geyB1cmwgPSAnaHR0cHM6Ly9tYXZlbi5uZW9mb3JnZWQubmV0L3JlbGVhc2VzJyB9CiAgICB9Cn0KCnBsdWdpbnMgewogICAgaWQgJ29yZy5ncmFkbGUudG9vbGNoYWlucy5mb29qYXktcmVzb2x2ZXItY29udmVudGlvbicgdmVyc2lvbiAnMS4wLjAnCn0KCnJvb3RQcm9qZWN0Lm5hbWUgPSAnYWlsbWVudHMnCg==' | base64 -d > settings.gradle
+          echo 'b3JnLmdyYWRsZS5qdm1hcmdzPS1YbXgyRwpvcmcuZ3JhZGxlLmRhZW1vbj1mYWxzZQpvcmcuZ3JhZGxlLmNvbmZpZ3VyYXRpb24tY2FjaGU9ZmFsc2UKb3JnLmdyYWRsZS5wYXJhbGxlbD1mYWxzZQoKbW9kX2lkPWFpbG1lbnRzCm1vZF9uYW1lPUFpbG1lbnRzCm1vZF92ZXJzaW9uPTEuMC4wCm1vZF9ncm91cF9pZD1jb20uYWlsbWVudHMKbW9kX2xpY2Vuc2U9QWxsIFJpZ2h0cyBSZXNlcnZlZApuZW9fdmVyc2lvbj0yMS4xMS4zLWJldGEKbWluZWNyYWZ0X3ZlcnNpb249MS4yMS4xMQo=' | base64 -d > gradle.properties
+          echo 'cGFja2FnZSBjb20uYWlsbWVudHM7CgppbXBvcnQgbmV0Lm5lb2ZvcmdlZC5idXMuYXBpLklFdmVudEJ1czsKaW1wb3J0IG5ldC5uZW9mb3JnZWQuZm1sLmNvbW1vbi5Nb2Q7CgpATW9kKEFpbG1lbnRzLk1PRF9JRCkKcHVibGljIGNsYXNzIEFpbG1lbnRzIHsKICAgIHB1YmxpYyBzdGF0aWMgZmluYWwgU3RyaW5nIE1PRF9JRCA9ICJhaWxtZW50cyI7CgogICAgcHVibGljIEFpbG1lbnRzKElFdmVudEJ1cyBtb2RFdmVudEJ1cykgewogICAgICAgIC8vINCi0YPRgiDQsdGD0LTQtdGCINC70L7Qs9C40LrQsCDQvNC+0LTQsAogICAgfQp9Cg==' | base64 -d > Ailments.java
+          echo 'bW9kTG9hZGVyPSJqYXZhZm1sIgpsb2FkZXJWZXJzaW9uPSJbMSwpIgpsaWNlbnNlPSJBbGwgUmlnaHRzIFJlc2VydmVkIgoKW1ttb2RzXV0KbW9kSWQ9ImFpbG1lbnRzIgp2ZXJzaW9uPSIxLjAuMCIKZGlzcGxheU5hbWU9IkFpbG1lbnRzIgpkZXNjcmlwdGlvbj0iQWlsbWVudHMiCgpbW2RlcGVuZGVuY2llcy5haWxtZW50c11dCm1vZElkPSJuZW9mb3JnZSIKdHlwZT0icmVxdWlyZWQiCnZlcnNpb25SYW5nZT0iWzIxLjExLjMtYmV0YSwpIgpvcmRlcmluZz0iTk9ORSIKc2lkZT0iQk9USCIKCltbZGVwZW5kZW5jaWVzLmFpbG1lbnRzXV0KbW9kSWQ9Im1pbmVjcmFmdCIKdHlwZT0icmVxdWlyZWQiCnZlcnNpb25SYW5nZT0iWzEuMjEuMTFdIgpvcmRlcmluZz0iTk9ORSIKc2lkZT0iQk9USCIK' | base64 -d > neoforge.mods.toml
+
+      - name: Build mod
+        run: gradle build --stacktrace --no-daemon
+
+      - name: Upload jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: ailments-jar
+          path: build/libs/*.jar
+          
