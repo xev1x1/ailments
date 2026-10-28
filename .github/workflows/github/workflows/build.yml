@@ -1,0 +1,37 @@
+name: Build mod
+
+on: [push, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Распаковать исходники, если загружен архив
+        run: |
+          if [ -f ailments-src.zip ]; then
+            unzip -o ailments-src.zip -d .
+          fi
+
+      - name: Установить Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Установить Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.14'
+
+      - name: Сборка
+        run: gradle build --no-daemon
+
+      - name: Загрузить jar как артефакт
+        uses: actions/upload-artifact@v4
+        with:
+          name: ailments-jar
+          path: build/libs/*.jar
+          
