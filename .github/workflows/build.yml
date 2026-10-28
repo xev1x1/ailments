@@ -1,37 +1,35 @@
 name: Build mod
 
-on: [push, workflow_dispatch]
+on: [push]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Распаковать исходники, если загружен архив
+      - name: Unzip sources
         run: |
-          if [ -f ailments-src.zip ]; then
-            unzip -o ailments-src.zip -d .
+          unzip -o ailments-src.zip -d build-src
+          # если внутри архива вложенная папка — заходим в неё
+          if [ -f build-src/build.gradle ]; then
+            echo "PROJ_DIR=build-src" >> $GITHUB_ENV
+          else
+            SUBDIR=$(find build-src -name build.gradle | head -1 | xargs dirname)
+            echo "PROJ_DIR=$SUBDIR" >> $GITHUB_ENV
           fi
 
-      - name: Установить Java 21
+      - name: Set up Java 21
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '21'
 
-      - name: Установить Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.14'
+      - name: Build
+        working-directory: ${{ env.PROJ_DIR }}
+        run: chmod +x gradlew && ./gradlew build
 
-      - name: Сборка
-        run: gradle build --no-daemon
-
-      - name: Загрузить jar как артефакт
+      - name: Upload jar
         uses: actions/upload-artifact@v4
         with:
           name: ailments-jar
-          path: build/libs/*.jar
+          path: ${{ env.PROJ_DIR }}/build/libs/*.jar
           
