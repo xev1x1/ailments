@@ -12,6 +12,7 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
+          java-options: -Xmx4096m  # Увеличиваем память до 4GB
 
       - uses: gradle/actions/setup-gradle@v4
         with:
