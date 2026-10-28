@@ -23,14 +23,19 @@ jobs:
 
       - name: Build
         run: |
+          set -o pipefail
           if [ -f build-src/build.gradle ]; then
             cd build-src
           else
             cd "$(dirname "$(find build-src -name build.gradle | head -1)")"
           fi
-          rm -rf ~/.cache/neoformruntime ~/.gradle/caches/neoformruntime
-          sed -i "s/2\.0\.47/2.0.148/" build.gradle
-          gradle build --no-daemon --stacktrace
+          (gradle build --no-daemon --stacktrace 2>&1 | tee build.log) || \
+          (rm -rf ~/.cache/neoformruntime ~/.gradle/caches && \
+           gradle build --no-daemon --stacktrace 2>&1 | tee -a build.log)
+
+      - name: Diagnose
+        if: failure()
+        run: tail -n 150 build.log
 
       - name: Upload jar
         uses: actions/upload-artifact@v4
