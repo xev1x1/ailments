@@ -27,6 +27,7 @@ jobs:
           else
             cd "$(dirname "$(find build-src -name build.gradle | head -1)")"
           fi
+          rm -rf ~/.cache/neoformruntime ~/.gradle/caches/neoformruntime
           gradle build --no-daemon --stacktrace
 
       - name: Upload jar
