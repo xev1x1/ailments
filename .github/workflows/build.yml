@@ -1,48 +1,40 @@
-name: Build mod
-
-on: [push]
-
+name: Build
+on: [push, workflow_dispatch]
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v4
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '21'
-          java-options: -Xmx4096m  # Увеличиваем память до 4GB
 
-      - uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.10.2'
-          cache: disabled
+      - name: Install Gradle 8.10.2
+        run: |
+          curl -sL https://services.gradle.org/distributions/gradle-8.10.2-bin.zip -o /tmp/g.zip
+          unzip -q /tmp/g.zip -d /opt
+          echo "/opt/gradle-8.10.2/bin" >> $GITHUB_PATH
 
-      - name: Unzip sources
-        run: python3 -c "import zipfile; zipfile.ZipFile('ailments-src.zip').extractall('build-src')"
+      - name: Unpack sources
+        run: |
+          python3 - <<'EOF'
+          import zipfile, glob, os
+          zipfile.ZipFile('ailments-src.zip').extractall('proj')
+          d = os.path.dirname(next(iter(glob.glob('proj/**/build.gradle', recursive=True))))
+          with open(os.environ['GITHUB_ENV'], 'a') as f:
+              f.write(f"PROJ_DIR={d}\n")
+          EOF
 
       - name: Build
-        run: |
-          set -o pipefail
-          if [ -f build-src/build.gradle ]; then
-            cd build-src
-          else
-            cd "$(dirname "$(find build-src -name build.gradle | head -1)")"
-          fi
-          LOG="$GITHUB_WORKSPACE/build.log"
-          (gradle build --no-daemon --stacktrace 2>&1 | tee "$LOG") || \
-          (rm -rf ~/.cache/neoformruntime ~/.gradle/caches && \
-           gradle build --no-daemon --stacktrace 2>&1 | tee -a "$LOG")
-
-      - name: Diagnose
-        if: failure()
-        run: tail -n 150 "$GITHUB_WORKSPACE/build.log"
+        run: gradle -p $PROJ_DIR build --no-daemon
 
       - name: Upload jar
         uses: actions/upload-artifact@v4
         with:
           name: ailments-jar
-          path: '**/build/libs/*.jar'
-          if-no-files-found: error
+          path: ${{ env.PROJ_DIR }}/build/libs/*.jar
           
