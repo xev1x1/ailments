@@ -28,6 +28,7 @@ jobs:
             cd "$(dirname "$(find build-src -name build.gradle | head -1)")"
           fi
           rm -rf ~/.cache/neoformruntime ~/.gradle/caches/neoformruntime
+          sed -i "s/2\.0\.47/2.0.148/" build.gradle
           gradle build --no-daemon --stacktrace
 
       - name: Upload jar
@@ -35,3 +36,4 @@ jobs:
         with:
           name: ailments-jar
           path: '**/build/libs/*.jar'
+          
